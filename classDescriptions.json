@@ -1,0 +1,180 @@
+[
+  {
+    "class": "Pessoa",
+    "extends": null,
+    "fields": [
+      "nome",
+      "nif",
+      "dataNascimento",
+      "contacto"
+    ]
+  },
+  {
+    "class": "Passageiro",
+    "extends": "Pessoa",
+    "fields": [
+      "numPassaporte"
+    ]
+  },
+  {
+    "class": "Funcionario",
+    "extends": "Pessoa",
+    "fields": [
+      "idFuncionario",
+      "salario",
+      "horario"
+    ]
+  },
+  {
+    "class": "Tripulacao",
+    "extends": "Funcionario",
+    "fields": [
+      "certificacoes",
+      "idiomasFalados",
+      "disponibilidade"
+    ]
+  },
+  {
+    "class": "Piloto",
+    "extends": "Tripulacao",
+    "fields": [
+      "idPessoa",
+      "numLicenca",
+      "validadeLicenca",
+      "nivelCertificacao"
+    ]
+  },
+  {
+    "class": "Comissario",
+    "extends": "Tripulacao",
+    "fields": [
+      "funcaoBordo"
+    ]
+  },
+  {
+    "class": "FuncionarioAeroporto",
+    "extends": "Funcionario",
+    "fields": [
+      "turno"
+    ]
+  },
+  {
+    "class": "Seguranca",
+    "extends": "FuncionarioAeroporto",
+    "fields": [
+      "idSecao",
+      "resultadoVerificacaoPadrao"
+    ]
+  },
+  {
+    "class": "CompanhiaAerea",
+    "extends": null,
+    "fields": [
+      "idCompanhia",
+      "nome"
+    ]
+  },
+  {
+    "class": "Aviao",
+    "extends": null,
+    "fields": [
+      "idAviao",
+      "modelo",
+      "capacidade",
+      "velocidadeMaxima",
+      "numMotores",
+      "peso",
+      "combustivelDepositado",
+      "horasVoo"
+    ]
+  },
+  {
+    "class": "Voo",
+    "extends": null,
+    "fields": [
+      "idVoo",
+      "horaPartida",
+      "horaChegada",
+      "origem",
+      "destino",
+      "duracao"
+    ]
+  },
+  {
+    "class": "PermissaoPiloto",
+    "extends": null,
+    "associates": ["Piloto", "Aviao"],
+    "fields": [
+      "idPessoa",
+      "idAviao",
+      "autorizado",
+      "restricao"
+    ]
+  },
+  {
+    "class": "Bilhete",
+    "extends": null,
+    "associates": ["Passageiro", "Voo"],
+    "fields": [
+      "idBilhete",
+      "idVoo",
+      "numLugar",
+      "classeVoo",
+      "preco"
+    ]
+  },
+  {
+    "class": "CheckIn",
+    "extends": null,
+    "fields": [
+      "idCheckIn",
+      "data",
+      "hora",
+      "local",
+      "estado",
+      "numMalas",
+      "observacoes",
+      "idBilhete"
+    ]
+  },
+  {
+    "class": "CartaoEmbarque",
+    "extends": null,
+    "associates": ["CheckIn", "Voo"],
+    "fields": [
+      "idCartao",
+      "portaEmbarque",
+      "horaEmbarque"
+    ]
+  },
+  {
+    "class": "Bagagem",
+    "extends": null,
+    "fields": [
+      "idBagagem",
+      "peso",
+      "estadoValidacao",
+      "destino"
+    ]
+  },
+  {
+    "class": "Equipamento",
+    "extends": null,
+    "fields": [
+      "idEquipamento",
+      "tipo",
+      "estado",
+      "emUso"
+    ]
+  },
+  {
+    "class": "Manutencao",
+    "extends": null,
+    "fields": [
+      "idManutencao",
+      "data",
+      "tipo",
+      "custo"
+    ]
+  }
+]
