@@ -1,5 +1,5 @@
 -- create1.sql
--- Esquema da base de dados do aeroporto (BCNF)
+-- Esquema da base de dados do aeroporto
 
 PRAGMA foreign_keys = ON;
 
@@ -127,7 +127,7 @@ CREATE TABLE Voo (
     idAviao      INTEGER NOT NULL,
     origem       TEXT    NOT NULL,
     destino      TEXT    NOT NULL,
-    horaPartida  TEXT    NOT NULL,   -- pode ser TIME ou DATETIME conforme preferires
+    horaPartida  TEXT    NOT NULL,   -- pode ser TIME ou DATETIME
     horaChegada  TEXT    NOT NULL,
     duracao      INTEGER NOT NULL,   -- por exemplo, em minutos
     FOREIGN KEY (idAviao) REFERENCES Aviao(idAviao)
