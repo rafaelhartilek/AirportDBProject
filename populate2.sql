@@ -1,173 +1,196 @@
+-- =============================================================================
 -- populate2.sql
--- Versão final do script de povoamento para o esquema de aeroporto (create2.sql)
--- Baseado em populate1.sql, no esquema refinado em BCNF (relationalDesignWithAI.md)
--- e nas especificações do Project Description.
--- Gerado com apoio de IA por ChatGPT – GPT-5.1 Thinking.
+-- Script de povoamento revisto para o esquema de aeroporto (create2.sql)
+-- Garante dados em todas as tabelas do esquema, com valores realistas.
+--
+-- Produzido com apoio de ChatGPT (OpenAI),
+-- modelo GPT-5.1 Thinking, novembro de 2025.
+-- =============================================================================
 
 PRAGMA foreign_keys = ON;
 
------------------------------------------------------------------------
--- PESSOAS E ESPECIALIZAÇÕES
------------------------------------------------------------------------
+BEGIN TRANSACTION;
 
--- Pessoas (base para todas as especializações)
-INSERT INTO Pessoa (idPessoa, nome, nif, dataNascimento, contacto) VALUES
-(1,  'João Silva',       '111111111', '1985-03-15', '912345678'),
-(2,  'Maria Santos',     '222222222', '1990-07-22', '923456789'),
-(3,  'Pedro Costa',      '333333333', '1982-11-10', '934567890'),
-(4,  'Ana Oliveira',     '444444444', '1988-05-18', '945678901'),
-(5,  'Carlos Pereira',   '555555555', '1975-01-09', '956789012'),
-(6,  'Sofia Almeida',    '666666666', '1983-09-30', '967890123'),
-(7,  'Luís Rocha',       '777777777', '1979-06-21', '978901234'),
-(8,  'Marta Gomes',      '888888888', '1992-02-14', '989012345'),
-(9,  'Paulo Ferreira',   '999999999', '1980-12-03', '990123456'),
-(10, 'Rita Marques',     '101010101', '1995-09-30', '901234567');
+-- =============================================================================
+-- PESSOA
+-- =============================================================================
+INSERT INTO Pessoa (numeroCC, nome, dataNascimento, infoContacto) VALUES 
+  ('111111111', 'Joao Silva',    '1980-01-01', 'joao.silva@example.com'),
+  ('222222222', 'Maria Costa',   '1988-03-22', 'maria.costa@example.com'),
+  ('333333333', 'Ana Pereira',   '1995-07-10', 'ana.pereira@example.com'),
+  ('444444444', 'Carlos Sousa',  '1975-11-05', 'carlos.sousa@example.com'),
+  ('555555555', 'Laura Martins', '1992-09-18', 'laura.martins@example.com'),
+  ('666666666', 'Pedro Gomes',   '1983-02-14', 'pedro.gomes@example.com'),
+  ('777777777', 'Rita Almeida',  '1990-12-30', 'rita.almeida@example.com');
 
--- Passageiros (subclasse de Pessoa)
-INSERT INTO Passageiro (idPessoa, numPassaporte) VALUES
-(1, 'PT123456'),
-(2, 'PT234567'),
-(3, 'PT345678'),
-(4, 'PT456789');
+-- =============================================================================
+-- PASSAGEIRO
+-- (quatro pessoas são passageiros)
+-- =============================================================================
+INSERT INTO Passageiro (numeroCC, numeroPassaporte) VALUES
+  ('111111111', 'PT1234567'),
+  ('222222222', 'PT9876543'),
+  ('333333333', 'BR4455667'),
+  ('777777777', 'ES7654321');
 
--- Funcionários (subclasse de Pessoa)
-INSERT INTO Funcionario (idPessoa, salario, horario) VALUES
-(5,  4500.00, '06:00-14:00'),
-(6,  4300.00, '14:00-22:00'),
-(7,  2800.00, '08:00-16:00'),
-(8,  2200.00, '07:00-15:00'),
-(9,  2300.00, '15:00-23:00'),
-(10, 2400.00, '23:00-07:00');
+-- =============================================================================
+-- COMPANHIAAEREA
+-- =============================================================================
+INSERT INTO CompanhiaAerea (nome) VALUES
+  ('TAP Air Portugal'),   -- idCompanhia = 1
+  ('Lufthansa'),          -- idCompanhia = 2
+  ('Ryanair'),            -- idCompanhia = 3
+  ('easyJet');            -- idCompanhia = 4
 
--- Tripulação (subclasse de Funcionario)
-INSERT INTO Tripulacao (idPessoa, certificacoes, idiomasFalados, disponibilidade) VALUES
-(5, 'ATPL, IFR',                   'Português, Inglês',              'Disponível'),
-(6, 'CPL, IFR',                    'Português, Inglês, Espanhol',    'Disponível'),
-(7, 'Cabin Crew Safety',           'Português, Inglês, Francês',     'Disponível');
-
--- Pilotos (subclasse de Tripulacao)
-INSERT INTO Piloto (idPessoa, numLicenca, validadeLicenca, nivelCertificacao) VALUES
-(5, 'PIL-2018-0001', '2027-03-31', 'Comandante'),
-(6, 'PIL-2020-0042', '2028-06-30', 'Primeiro Oficial');
-
--- Comissários (subclasse de Tripulacao)
-INSERT INTO Comissario (idPessoa, funcaoBordo) VALUES
-(7, 'Chefe de Cabine');
-
--- Funcionários de aeroporto (subclasse de Funcionario)
-INSERT INTO FuncionarioAeroporto (idPessoa, turno) VALUES
-(8, 'Manhã'),
-(9, 'Tarde'),
-(10,'Noite');
-
--- Segurança (subclasse de FuncionarioAeroporto)
-INSERT INTO Seguranca (idPessoa, idSecao, resultadoVerificacaoPadrao) VALUES
-(8, 101, 'Aprovado'),
-(9, 102, 'Aprovado');
-
------------------------------------------------------------------------
--- COMPANHIAS, AVIÕES E VOOS
------------------------------------------------------------------------
-
-INSERT INTO CompanhiaAerea (idCompanhia, nome) VALUES
-(1, 'TAP Air Portugal'),
-(2, 'Ryanair'),
-(3, 'easyJet');
-
+-- =============================================================================
+-- AVIAO
+-- (pelo menos um aviao por algumas companhias)
+-- =============================================================================
 INSERT INTO Aviao (
-    idAviao, idCompanhia, modelo, capacidade,
-    velocidadeMaxima, numMotores, peso,
-    combustivelDepositado, horasVoo
+    modelo, numMotores, status, capacidade, peso,
+    depositoGasolina, consumoMedio, velocidadeMax, tempoUsoTotal, idCompanhia
 ) VALUES
-(1, 1, 'Airbus A320', 180, 840.0, 2, 73500.0, 24000.0, 12000.0),
-(2, 1, 'Airbus A321', 200, 830.0, 2, 89000.0, 26000.0,  9500.0),
-(3, 2, 'Boeing 737-800', 189, 842.0, 2, 79015.0, 23800.0, 10000.0),
-(4, 3, 'Airbus A319', 144, 828.0, 2, 75500.0, 22000.0,  8000.0);
+  ('Airbus A320neo',    2, 'operacional', 174, 42000,  8000, 2200, 840, 9500, 1), -- TAP
+  ('Boeing 737-800',    2, 'operacional', 189, 45000,  8200, 2300, 850, 8700, 3), -- Ryanair
+  ('Airbus A321-200',   2, 'operacional', 214, 47000,  9000, 2400, 870, 7600, 2), -- Lufthansa
+  ('Airbus A319',       2, 'manutencao',  144, 40000,  7800, 2100, 820, 5000, 4); -- easyJet
 
+-- IDs esperados: Aviao 1..4
+
+-- =============================================================================
+-- VOO
+-- Cada voo referencia uma companhia e um aviao
+-- =============================================================================
 INSERT INTO Voo (
-    idVoo, idAviao, origem, destino,
-    horaPartida,          horaChegada,         duracao
+    horaPartida, horaChegada, origem, destino, data,
+    duracao, lugaresDisponiveis, idCompanhia, idAviao
 ) VALUES
-(1, 1, 'Lisboa',  'Porto',  '2025-11-20 08:00', '2025-11-20 08:50',  50),
-(2, 1, 'Porto',   'Faro',   '2025-11-20 10:00', '2025-11-20 11:05',  65),
-(3, 3, 'Lisboa',  'Londres','2025-11-20 14:00', '2025-11-20 16:40', 160),
-(4, 4, 'Porto',   'Madrid', '2025-11-21 06:00', '2025-11-21 07:45', 105),
-(5, 2, 'Faro',    'Lisboa', '2025-11-22 17:00', '2025-11-22 17:45',  45);
+  ('07:00', '07:55', 'OPO', 'LIS', '2025-12-01',  55, 170, 1, 1), -- TAP, A320neo
+  ('09:30', '11:15', 'LIS', 'FNC', '2025-12-01', 105, 165, 1, 1), -- TAP, A320neo
+  ('12:30', '16:15', 'LIS', 'FRA', '2025-12-02', 225, 200, 2, 3), -- Lufthansa, A321
+  ('18:00', '21:00', 'OPO', 'STN', '2025-12-03', 180, 185, 3, 2); -- Ryanair, B737-800
 
------------------------------------------------------------------------
--- BILHETES, CHECK-IN E CARTÕES DE EMBARQUE
------------------------------------------------------------------------
+-- IDs esperados: Voo 1..4
 
-INSERT INTO Bilhete (
-    idBilhete, idPessoa, idVoo,
-    numLugar, classeVoo, preco
-) VALUES
-(1, 1, 1, '12A', 'Económica',  80.00),
-(2, 2, 1, '12B', 'Económica',  80.00),
-(3, 3, 3, '3C',  'Executiva', 350.00),
-(4, 4, 4, '20D', 'Económica', 120.00),
-(5, 1, 5, '5A',  'Económica',  70.00);
+-- =============================================================================
+-- FUNCIONARIO
+-- 5 funcionarios: 3 tripulacao, 2 aeroporto
+-- =============================================================================
+INSERT INTO Funcionario (numeroCC, horario, salario) VALUES 
+  ('444444444', '06:00-14:00', 3200.00), -- idFuncionario = 1 (piloto)
+  ('555555555', '06:00-14:00', 2800.00), -- idFuncionario = 2 (copiloto)
+  ('666666666', '06:00-14:00', 2300.00), -- idFuncionario = 3 (comissario)
+  ('333333333', '09:00-17:00', 1800.00), -- idFuncionario = 4 (check-in)
+  ('222222222', '14:00-22:00', 1900.00); -- idFuncionario = 5 (gate/embarque)
 
+-- =============================================================================
+-- TRIPULACAO
+-- Funcionarios 1,2,3 são tripulantes
+-- =============================================================================
+INSERT INTO Tripulacao (idFuncionario, certificados) VALUES
+  (1, 'ATPL; IFR; Airbus A320'),
+  (2, 'Co-piloto; Airbus A320/B737'),
+  (3, 'Comissario de bordo; Safety training');
+
+-- =============================================================================
+-- FUNCIONARIOAEROPORTO
+-- Funcionarios 4 e 5 trabalham em terra
+-- =============================================================================
+INSERT INTO FuncionarioAeroporto (idFuncionario, departamento) VALUES
+  (4, 'Check-in'),
+  (5, 'Embarque e portoes');
+
+-- =============================================================================
+-- PILOTO
+-- Funcionarios 1 e 2 são pilotos
+-- =============================================================================
+INSERT INTO Piloto (idFuncionario, nLicenca) VALUES
+  (1, 'TAP-PT-0001'),
+  (2, 'TAP-PT-0101');
+
+-- =============================================================================
+-- COMISSARIO
+-- Funcionario 3 é comissario de bordo
+-- =============================================================================
+INSERT INTO Comissario (idFuncionario, funcao) VALUES
+  (3, 'Chefe de cabine');
+
+-- =============================================================================
+-- PILOTODOAVIAO
+-- Relacao N:M entre pilotos e avioes
+-- =============================================================================
+INSERT INTO PilotoDoAviao (idAviao, idFuncionario) VALUES
+  (1, 1), -- piloto 1 habilitado no A320neo
+  (1, 2), -- copiloto 2 habilitado no A320neo
+  (2, 2), -- copiloto 2 habilitado no B737-800
+  (3, 1); -- piloto 1 habilitado no A321-200
+
+-- =============================================================================
+-- TRIPULACAONOVOO
+-- Relacao N:M entre tripulacao e voos
+-- =============================================================================
+INSERT INTO TripulacaoNoVoo (idVoo, idFuncionario) VALUES
+  -- Voo 1: OPO-LIS
+  (1, 1), (1, 2), (1, 3),
+  -- Voo 2: LIS-FNC
+  (2, 1), (2, 2), (2, 3),
+  -- Voo 3: LIS-FRA
+  (3, 1), (3, 2), (3, 3),
+  -- Voo 4: OPO-STN
+  (4, 1), (4, 2), (4, 3);
+
+-- =============================================================================
+-- BILHETE
+-- Bilhetes para vários voos e passageiros
+-- =============================================================================
+INSERT INTO Bilhete (numeroLugar, classe, preco, idVoo, numeroCCPassageiro) VALUES
+  ('12A', 'economica',  89.99, 1, '111111111'), -- Joao, OPO-LIS
+  ('12B', 'economica',  89.99, 1, '222222222'), -- Maria, OPO-LIS
+  ('3C',  'economica', 149.50, 2, '333333333'), -- Ana, LIS-FNC
+  ('14D', 'economica', 139.90, 2, '777777777'), -- Rita, LIS-FNC
+  ('2A',  'executiva', 399.90, 3, '111111111'), -- Joao, LIS-FRA
+  ('21F', 'economica',  79.90, 4, '222222222'); -- Maria, OPO-STN
+
+-- =============================================================================
+-- CHECKIN
+-- Supondo IDs de CheckIn sequenciais (1..6)
+-- =============================================================================
 INSERT INTO CheckIn (
-    idCheckIn, idBilhete, data, hora,
-    local,       estado,   numMalas, observacoes
+    data, hora, local, estado, nMalas, pesoTotal, observacoes, numeroCCPassageiro
 ) VALUES
-(1, 1, '2025-11-20', '06:30', 'Balcão 10', 'valido',   1, NULL),
-(2, 2, '2025-11-20', '06:45', 'Balcão 10', 'valido',   0, 'Passageiro sem bagagem'),
-(3, 3, '2025-11-20', '12:00', 'Online',    'valido',   1, 'Check-in online'),
-(4, 4, '2025-11-21', '04:45', 'Balcão 5',  'valido',   2, NULL),
-(5, 5, '2025-11-22', '16:10', 'Online',    'invalido', 0, 'Pagamento pendente');
+  ('2025-12-01', '05:45', 'balcao 10', 'concluido', 1, 18.2, 'Bagagem de mao adicional', '111111111'), -- voo 1
+  ('2025-12-01', '05:50', 'balcao 10', 'concluido', 1, 20.0, 'Nenhuma',                  '222222222'), -- voo 1
+  ('2025-12-01', '08:15', 'balcao 15', 'concluido', 2, 32.5, 'Uma mala fragil',          '333333333'), -- voo 2
+  ('2025-12-01', '08:20', 'balcao 15', 'concluido', 1, 17.8, 'Assento janela',           '777777777'), -- voo 2
+  ('2025-12-02', '10:45', 'balcao 12', 'concluido', 1, 19.0, 'Conexao para FRA',         '111111111'), -- voo 3
+  ('2025-12-03', '16:30', 'balcao 8',  'concluido', 1, 21.3, 'Bagagem de mao volumosa',  '222222222'); -- voo 4
 
-INSERT INTO CartaoEmbarque (
-    idCartao, idCheckIn, idVoo,
-    portaEmbarque, horaEmbarque
-) VALUES
-(1, 1, 1, 'Gate 15', '07:30'),
-(2, 2, 1, 'Gate 15', '07:30'),
-(3, 3, 3, 'Gate 7',  '13:30'),
-(4, 4, 4, 'Gate 2',  '06:15');
+-- =============================================================================
+-- CARTAOEMBARQUE
+-- Cada check-in gera no maximo um cartao
+-- =============================================================================
+INSERT INTO CartaoEmbarque (portaEmbarque, horaEmbarque, idCheckIn, idVoo) VALUES
+  ('A12', '06:20', 1, 1), -- Joao, voo 1
+  ('A12', '06:25', 2, 1), -- Maria, voo 1
+  ('B07', '08:45', 3, 2), -- Ana,  voo 2
+  ('B07', '08:50', 4, 2), -- Rita, voo 2
+  ('C03', '11:15', 5, 3), -- Joao, voo 3
+  ('D09', '17:15', 6, 4); -- Maria, voo 4
 
------------------------------------------------------------------------
+-- =============================================================================
 -- BAGAGEM
------------------------------------------------------------------------
+-- Pelo menos uma bagagem por check-in (onde faz sentido)
+-- =============================================================================
+INSERT INTO Bagagem (peso, status, destinoFinal, idCheckIn) VALUES
+  (18.2, 'despachada',  'LIS', 1),
+  (20.0, 'despachada',  'LIS', 2),
+  (18.0, 'despachada',  'FNC', 3),
+  (14.5, 'despachada',  'FNC', 4),
+  (19.0, 'em transito', 'FRA', 5),
+  (21.3, 'despachada',  'STN', 6);
 
-INSERT INTO Bagagem (
-    idBagagem, idCheckIn, idSecao,
-    peso,  estadoValidacao, destino
-) VALUES
-(1, 1, 101, 18.5, 'Aprovado',  'Porto'),
-(2, 1, 101,  9.2, 'Aprovado',  'Porto'),
-(3, 3, 102, 21.0, 'Aprovado',  'Londres'),
-(4, 4, 101, 23.0, 'Reprovado', 'Madrid'),
-(5, 4, 102, 19.2, 'Aprovado',  'Madrid');
+COMMIT;
 
------------------------------------------------------------------------
--- EQUIPAMENTO
------------------------------------------------------------------------
-
-INSERT INTO Equipamento (
-    idEquipamento, idPessoa,
-    tipo,                   estado,       emUso
-) VALUES
-(1, 8,  'Scanner de Raio-X', 'Operacional', 1),
-(2, 8,  'Detetor de Metais', 'Operacional', 1),
-(3, 9,  'Veículo de Rampa',  'Manutenção',  0),
-(4, 10, 'Esteira de Bagagem','Operacional', 1),
-(5, 10, 'Trator de Bagagem', 'Operacional', 1);
-
------------------------------------------------------------------------
--- MANUTENÇÃO
------------------------------------------------------------------------
-
-INSERT INTO Manutencao (
-    idManutencao, idAviao, idPessoa,
-    data,        tipo,                 custo
-) VALUES
-(1, 1, 9,  '2025-11-15', 'Inspeção de Rotina',    2500.00),
-(2, 2, 9,  '2025-11-10', 'Troca de Óleo',         1800.00),
-(3, 3, 10, '2025-11-12', 'Verificação de Pneus',   950.00),
-(4, 1, 10, '2025-11-18', 'Inspeção Pré-Voo',       500.00),
-(5, 4, 9,  '2025-11-16', 'Manutenção Preventiva', 3200.00);
-
--- Fim do ficheiro populate2.sql
--- Script final de povoamento elaborado com apoio de IA (ChatGPT – GPT-5.1 Thinking).
+-- =============================================================================
+-- FIM DO SCRIPT (populate2.sql - versão revista com IA, com todas as tabelas populadas)
+-- =============================================================================
