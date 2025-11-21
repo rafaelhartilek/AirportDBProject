@@ -1,120 +1,72 @@
 Pessoa(
-  [idPessoa],
+  [numeroCC],
   nome,
-  nif,
   dataNascimento,
-  contacto
+  infoContacto,
 )
 
 Passageiro(
-  [idPassageiro],
-  idPessoa->Pessoa,
-  nome,
-  nif,
-  dataNascimento,
-  contacto,
-  numPassaporte
+ [numeroCC]->Pessoa,
+  númeroPassaporte, 
 )
 
 Funcionario(
-  [idFuncionario],
-  idPessoa->Pessoa,
-  nome,
-  nif,
-  dataNascimento,
-  contacto,
-  salario,
-  horario
+  numeroCC->Pessoa,
+ [idFuncionário],
+  horário,
+  salário,
 )
+
 
 Tripulacao(
-  [idTripulacao],
-  idFuncionario->Funcionario,
-  nome,
-  nif,
-  dataNascimento,
-  contacto,
-  salario,
-  horario,
-  certificacoes,
-  idiomasFalados,
-  disponibilidade
-)
-
-Piloto(
-  [idPiloto],
-  idTripulacao->Tripulacao,
-  nome,
-  nif,
-  dataNascimento,
-  contacto,
-  salario,
-  horario,
-  certificacoes,
-  idiomasFalados,
-  disponibilidade,
-  idPessoa,
-  numLicenca,
-  validadeLicenca,
-  nivelCertificacao
-)
-
-Comissario(
-  [idComissario],
-  idTripulacao->Tripulacao,
-  nome,
-  nif,
-  dataNascimento,
-  contacto,
-  salario,
-  horario,
-  certificacoes,
-  idiomasFalados,
-  disponibilidade,
-  funcaoBordo
+  [idFuncionário]->Funcionario,
+  certificados,
 )
 
 FuncionarioAeroporto(
-  [idFuncionarioAeroporto],
-  idFuncionario->Funcionario,
-  nome,
-  nif,
-  dataNascimento,
-  contacto,
-  salario,
-  horario,
-  turno
+ [idFuncionário]->Funcionario,
+  departamento,
 )
 
-Seguranca(
-  [idSeguranca],
-  idFuncionarioAeroporto->FuncionarioAeroporto,
-  nome,
-  nif,
-  dataNascimento,
-  contacto,
-  salario,
-  horario,
-  turno,
-  idSecao,
-  resultadoVerificacaoPadrao
+Piloto(
+ [idFuncionário]->Tripulacao,
+  nLicença,
+  
+)
+
+Comissario(
+ [idFuncionário]->Tripulacao,
+  função,
 )
 
 CompanhiaAerea(
-  [idCompanhiaAerea],
-  idCompanhia,
-  nome
+  [idCompanhia],
+  nome,
+)
+
+PilotoDoAviao(
+ [idAviao]->Aviao,
+  idFuncionario->Piloto,
 )
 
 Aviao(
   [idAviao],
   modelo,
-  capacidade,
-  velocidadeMaxima,
   numMotores,
+  status,
+  capacidade,
   peso,
-  combustivelDepositado,
-  horasVoo
+  depósitoGasolina,
+  consumoMédio,
+  velocidadeMax,
+  tempoUsoTotal,
+  idCompanhia->CompanhiaAerea,
+  idVoo->Voo,
+)
+
+TripulaçãoNoVoo(
+  [idVoo]->Voo,
+  idFuncionário->Tripulacao,
 )
 
 Voo(
@@ -123,17 +75,21 @@ Voo(
   horaChegada,
   origem,
   destino,
-  duracao
+  data,
+  duracao,
+  lugaresDisponiveis,
+  idCompanhia->CompanhiaAerea,
 )
-
 
 Bilhete(
   [idBilhete],
+  numeroLugar,
+  classe,
+  preco,
   idVoo->Voo,
-  numLugar,
-  classeVoo,
-  preco
+  numeroCCPassageiro->Passageiro,
 )
+
 
 CheckIn(
   [idCheckIn],
@@ -141,35 +97,25 @@ CheckIn(
   hora,
   local,
   estado,
-  numMalas,
+  nMalas,
+  pesoTotal
   observacoes,
-  idBilhete->Bilhete
+  numeroCCPassageiro->Passageiro,
 )
 
 CartaoEmbarque(
-  [idCartaoEmbarque],
-  idCartao->CheckIn,
+  [idCartao],
   portaEmbarque,
-  horaEmbarque
+  horaEmbarque,
+  idCheckIn->CheckIn,
+  idVoo-> Voo,
 )
 
 Bagagem(
   [idBagagem],
   peso,
-  estadoValidacao,
-  destino
+  status,
+  destinoFinal,
+  idCheckIn->CheckIn,	
 )
 
-Equipamento(
-  [idEquipamento],
-  tipo,
-  estado,
-  emUso
-)
-
-Manutencao(
-  [idManutencao],
-  data,
-  tipo,
-  custo
-)

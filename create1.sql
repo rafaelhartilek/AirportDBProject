@@ -1,221 +1,276 @@
--- Drop all tables if exist (in reverse dependency order)
-DROP TABLE IF EXISTS Seguranca;
-DROP TABLE IF EXISTS FuncionarioAeroporto;
-DROP TABLE IF EXISTS Comissario;
-DROP TABLE IF EXISTS Piloto;
-DROP TABLE IF EXISTS Tripulacao;
-DROP TABLE IF EXISTS Funcionario;
-DROP TABLE IF EXISTS Passageiro;
+-- =============================================================================
+-- create1.sql
+-- Implementaçao do SQL para a primeira versao do desing relacional
+-- Ainda sem modificaçoes ou sugestoes de IA
+-- =============================================================================
+
+-- Ativar foreign keys no SQLite
+PRAGMA foreign_keys = ON;
+
+-- =============================================================================
+-- DROP TABLES (em ordem reversa de dependências)
+-- =============================================================================
+
+DROP TABLE IF EXISTS Bagagem;
 DROP TABLE IF EXISTS CartaoEmbarque;
 DROP TABLE IF EXISTS CheckIn;
 DROP TABLE IF EXISTS Bilhete;
-DROP TABLE IF EXISTS Voo;
+DROP TABLE IF EXISTS TripulacaoNoVoo;
+DROP TABLE IF EXISTS PilotoDoAviao;
 DROP TABLE IF EXISTS Aviao;
+DROP TABLE IF EXISTS Voo;
+DROP TABLE IF EXISTS Comissario;
+DROP TABLE IF EXISTS Piloto;
+DROP TABLE IF EXISTS FuncionarioAeroporto;
+DROP TABLE IF EXISTS Tripulacao;
+DROP TABLE IF EXISTS Funcionario;
+DROP TABLE IF EXISTS Passageiro;
 DROP TABLE IF EXISTS CompanhiaAerea;
-DROP TABLE IF EXISTS Bagagem;
-DROP TABLE IF EXISTS Equipamento;
-DROP TABLE IF EXISTS Manutencao;
 DROP TABLE IF EXISTS Pessoa;
 
--- Pessoa
+-- =============================================================================
+-- TABELA: Pessoa
+-- Base para todos os indivíduos no sistema (passageiros e funcionários)
+-- =============================================================================
 CREATE TABLE Pessoa (
-  idPessoa INTEGER PRIMARY KEY,
-  nome TEXT,
-  nif TEXT,
-  dataNascimento DATE,
-  contacto TEXT
+    numeroCC TEXT PRIMARY KEY,
+    nome TEXT NOT NULL,
+    dataNascimento DATE NOT NULL,
+    infoContacto TEXT
 );
 
--- Passageiro
+-- =============================================================================
+-- TABELA: Passageiro
+-- Especialização de Pessoa para clientes que viajam
+-- =============================================================================
 CREATE TABLE Passageiro (
-  idPassageiro INTEGER PRIMARY KEY,
-  idPessoa INTEGER,
-  nome TEXT,
-  nif TEXT,
-  dataNascimento DATE,
-  contacto TEXT,
-  numPassaporte TEXT,
-  FOREIGN KEY (idPessoa) REFERENCES Pessoa(idPessoa)
+    numeroCC TEXT PRIMARY KEY,
+    numeroPassaporte TEXT UNIQUE NOT NULL,
+    FOREIGN KEY (numeroCC) REFERENCES Pessoa(numeroCC) 
+        ON DELETE CASCADE 
+        ON UPDATE CASCADE
 );
 
--- Funcionario
-CREATE TABLE Funcionario (
-  idFuncionario INTEGER PRIMARY KEY,
-  idPessoa INTEGER,
-  nome TEXT,
-  nif TEXT,
-  dataNascimento DATE,
-  contacto TEXT,
-  salario REAL,
-  horario TEXT,
-  FOREIGN KEY (idPessoa) REFERENCES Pessoa(idPessoa)
-);
-
--- Tripulacao
-CREATE TABLE Tripulacao (
-  idTripulacao INTEGER PRIMARY KEY,
-  idFuncionario INTEGER,
-  nome TEXT,
-  nif TEXT,
-  dataNascimento DATE,
-  contacto TEXT,
-  salario REAL,
-  horario TEXT,
-  certificacoes TEXT,
-  idiomasFalados TEXT,
-  disponibilidade TEXT,
-  FOREIGN KEY (idFuncionario) REFERENCES Funcionario(idFuncionario)
-);
-
--- Piloto
-CREATE TABLE Piloto (
-  idPiloto INTEGER PRIMARY KEY,
-  idTripulacao INTEGER,
-  nome TEXT,
-  nif TEXT,
-  dataNascimento DATE,
-  contacto TEXT,
-  salario REAL,
-  horario TEXT,
-  certificacoes TEXT,
-  idiomasFalados TEXT,
-  disponibilidade TEXT,
-  idPessoa INTEGER,
-  numLicenca TEXT,
-  validadeLicenca DATE,
-  nivelCertificacao TEXT,
-  FOREIGN KEY (idTripulacao) REFERENCES Tripulacao(idTripulacao),
-  FOREIGN KEY (idPessoa) REFERENCES Pessoa(idPessoa)
-);
-
--- Comissario
-CREATE TABLE Comissario (
-  idComissario INTEGER PRIMARY KEY,
-  idTripulacao INTEGER,
-  nome TEXT,
-  nif TEXT,
-  dataNascimento DATE,
-  contacto TEXT,
-  salario REAL,
-  horario TEXT,
-  certificacoes TEXT,
-  idiomasFalados TEXT,
-  disponibilidade TEXT,
-  funcaoBordo TEXT,
-  FOREIGN KEY (idTripulacao) REFERENCES Tripulacao(idTripulacao)
-);
-
--- FuncionarioAeroporto
-CREATE TABLE FuncionarioAeroporto (
-  idFuncionarioAeroporto INTEGER PRIMARY KEY,
-  idFuncionario INTEGER,
-  nome TEXT,
-  nif TEXT,
-  dataNascimento DATE,
-  contacto TEXT,
-  salario REAL,
-  horario TEXT,
-  turno TEXT,
-  FOREIGN KEY (idFuncionario) REFERENCES Funcionario(idFuncionario)
-);
-
--- Seguranca
-CREATE TABLE Seguranca (
-  idSeguranca INTEGER PRIMARY KEY,
-  idFuncionarioAeroporto INTEGER,
-  nome TEXT,
-  nif TEXT,
-  dataNascimento DATE,
-  contacto TEXT,
-  salario REAL,
-  horario TEXT,
-  turno TEXT,
-  idSecao INTEGER,
-  resultadoVerificacaoPadrao TEXT,
-  FOREIGN KEY (idFuncionarioAeroporto) REFERENCES FuncionarioAeroporto(idFuncionarioAeroporto)
-);
-
--- CompanhiaAerea
+-- =============================================================================
+-- TABELA: CompanhiaAerea
+-- Empresas operadoras de voos
+-- =============================================================================
 CREATE TABLE CompanhiaAerea (
-  idCompanhiaAerea INTEGER PRIMARY KEY,
-  idCompanhia INTEGER,
-  nome TEXT
+    idCompanhia INTEGER PRIMARY KEY AUTOINCREMENT,
+    nome TEXT UNIQUE NOT NULL
 );
 
--- Aviao
-CREATE TABLE Aviao (
-  idAviao INTEGER PRIMARY KEY,
-  modelo TEXT,
-  capacidade INTEGER,
-  velocidadeMaxima REAL,
-  numMotores INTEGER,
-  peso REAL,
-  combustivelDepositado REAL,
-  horasVoo REAL
-);
-
--- Voo
+-- =============================================================================
+-- TABELA: Voo
+-- Informações sobre voos programados
+-- =============================================================================
 CREATE TABLE Voo (
-  idVoo INTEGER PRIMARY KEY,
-  horaPartida DATETIME,
-  horaChegada DATETIME,
-  origem TEXT,
-  destino TEXT,
-  duracao INTEGER
+    idVoo INTEGER PRIMARY KEY AUTOINCREMENT,
+    idAviao INTEGER,
+    horaPartida TIME NOT NULL,
+    horaChegada TIME NOT NULL,
+    origem TEXT NOT NULL,
+    destino TEXT NOT NULL,
+    data DATE NOT NULL,
+    duracao INTEGER NOT NULL, -- em minutos
+    lugaresDisponiveis INTEGER NOT NULL CHECK (lugaresDisponiveis >= 0),
+    idCompanhia INTEGER NOT NULL,
+    FOREIGN KEY (idCompanhia) REFERENCES CompanhiaAerea(idCompanhia)
+        ON DELETE RESTRICT
+        ON UPDATE CASCADE
 );
 
--- Bilhete
+-- =============================================================================
+-- TABELA: Funcionario
+-- Base para todos os funcionários do sistema
+-- =============================================================================
+CREATE TABLE Funcionario (
+    numeroCC TEXT NOT NULL,
+    idFuncionario INTEGER PRIMARY KEY AUTOINCREMENT,
+    horario TEXT,
+    salario REAL CHECK (salario > 0),
+    FOREIGN KEY (numeroCC) REFERENCES Pessoa(numeroCC)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
+);
+
+-- =============================================================================
+-- TABELA: Tripulacao
+-- Funcionários que trabalham em voos (pilotos e comissários)
+-- =============================================================================
+CREATE TABLE Tripulacao (
+    idFuncionario INTEGER PRIMARY KEY,
+    certificados TEXT,
+    FOREIGN KEY (idFuncionario) REFERENCES Funcionario(idFuncionario)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
+);
+
+-- =============================================================================
+-- TABELA: FuncionarioAeroporto
+-- Funcionários que trabalham em terra no aeroporto
+-- =============================================================================
+CREATE TABLE FuncionarioAeroporto (
+    idFuncionario INTEGER PRIMARY KEY,
+    departamento TEXT NOT NULL,
+    FOREIGN KEY (idFuncionario) REFERENCES Funcionario(idFuncionario)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
+);
+
+-- =============================================================================
+-- TABELA: Piloto
+-- Tripulação habilitada para pilotar aeronaves
+-- =============================================================================
+CREATE TABLE Piloto (
+    idFuncionario INTEGER PRIMARY KEY,
+    nLicenca TEXT UNIQUE NOT NULL,
+    FOREIGN KEY (idFuncionario) REFERENCES Tripulacao(idFuncionario)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
+);
+
+-- =============================================================================
+-- TABELA: Comissario
+-- Tripulação responsável pelo atendimento aos passageiros
+-- =============================================================================
+CREATE TABLE Comissario (
+    idFuncionario INTEGER PRIMARY KEY,
+    funcao TEXT NOT NULL, -- ex: chefe de cabine, comissário sênior, etc.
+    FOREIGN KEY (idFuncionario) REFERENCES Tripulacao(idFuncionario)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
+);
+
+-- =============================================================================
+-- TABELA: Aviao
+-- Aeronaves da frota
+-- =============================================================================
+CREATE TABLE Aviao (
+    idAviao INTEGER PRIMARY KEY AUTOINCREMENT,
+    modelo TEXT NOT NULL,
+    numMotores INTEGER NOT NULL CHECK (numMotores > 0),
+    status TEXT NOT NULL, -- ex: 'operacional', 'manutenção', 'inativo'
+    capacidade INTEGER NOT NULL CHECK (capacidade > 0),
+    peso REAL NOT NULL CHECK (peso > 0), -- em kg
+    depositoGasolina REAL NOT NULL CHECK (depositoGasolina > 0), -- em litros
+    consumoMedio REAL NOT NULL CHECK (consumoMedio > 0), -- litros/hora
+    velocidadeMax REAL NOT NULL CHECK (velocidadeMax > 0), -- km/h
+    tempoUsoTotal INTEGER DEFAULT 0, -- em horas de voo
+    idCompanhia INTEGER NOT NULL,
+    idVoo INTEGER, -- voo atual (pode ser NULL se não estiver alocado)
+    FOREIGN KEY (idCompanhia) REFERENCES CompanhiaAerea(idCompanhia)
+        ON DELETE RESTRICT
+        ON UPDATE CASCADE,
+    FOREIGN KEY (idVoo) REFERENCES Voo(idVoo)
+        ON DELETE SET NULL
+        ON UPDATE CASCADE
+);
+
+-- =============================================================================
+-- TABELA: PilotoDoAviao
+-- Relacionamento entre pilotos e aviões que estão autorizados a pilotar
+-- =============================================================================
+CREATE TABLE PilotoDoAviao (
+    idAviao INTEGER NOT NULL,
+    idFuncionario INTEGER NOT NULL,
+    PRIMARY KEY (idAviao, idFuncionario),
+    FOREIGN KEY (idAviao) REFERENCES Aviao(idAviao)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE,
+    FOREIGN KEY (idFuncionario) REFERENCES Piloto(idFuncionario)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
+);
+
+-- =============================================================================
+-- TABELA: TripulacaoNoVoo
+-- Atribuição de tripulantes a voos específicos
+-- =============================================================================
+CREATE TABLE TripulacaoNoVoo (
+    idVoo INTEGER NOT NULL,
+    idFuncionario INTEGER NOT NULL,
+    PRIMARY KEY (idVoo, idFuncionario),
+    FOREIGN KEY (idVoo) REFERENCES Voo(idVoo)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE,
+    FOREIGN KEY (idFuncionario) REFERENCES Tripulacao(idFuncionario)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
+);
+
+-- =============================================================================
+-- TABELA: Bilhete
+-- Bilhetes/passagens comprados pelos passageiros
+-- =============================================================================
 CREATE TABLE Bilhete (
-  idBilhete INTEGER PRIMARY KEY,
-  idVoo INTEGER,
-  numLugar TEXT,
-  classeVoo TEXT,
-  preco REAL,
-  FOREIGN KEY (idVoo) REFERENCES Voo(idVoo)
+    idBilhete INTEGER PRIMARY KEY AUTOINCREMENT,
+    numeroLugar TEXT NOT NULL,
+    classe TEXT NOT NULL, -- ex: 'econômica', 'executiva', 'primeira classe'
+    preco REAL NOT NULL CHECK (preco >= 0),
+    idVoo INTEGER NOT NULL,
+    numeroCCPassageiro TEXT NOT NULL,
+    FOREIGN KEY (idVoo) REFERENCES Voo(idVoo)
+        ON DELETE RESTRICT
+        ON UPDATE CASCADE,
+    FOREIGN KEY (numeroCCPassageiro) REFERENCES Passageiro(numeroCC)
+        ON DELETE RESTRICT
+        ON UPDATE CASCADE,
+    UNIQUE (idVoo, numeroLugar) -- cada lugar é único por voo
 );
 
--- CheckIn
+-- =============================================================================
+-- TABELA: CheckIn
+-- Processo de check-in realizado pelos passageiros
+-- =============================================================================
 CREATE TABLE CheckIn (
-  idCheckIn INTEGER PRIMARY KEY,
-  data DATE,
-  hora TIME,
-  local TEXT,
-  estado TEXT,
-  numMalas INTEGER,
-  observacoes TEXT,
-  idBilhete INTEGER,
-  FOREIGN KEY (idBilhete) REFERENCES Bilhete(idBilhete)
+    idCheckIn INTEGER PRIMARY KEY AUTOINCREMENT,
+    data DATE NOT NULL,
+    hora TIME NOT NULL,
+    local TEXT NOT NULL, -- ex: 'balcão 5', 'online', 'quiosque 3'
+    estado TEXT NOT NULL, -- ex: 'concluído', 'pendente', 'cancelado'
+    nMalas INTEGER DEFAULT 0 CHECK (nMalas >= 0),
+    pesoTotal REAL DEFAULT 0 CHECK (pesoTotal >= 0), -- em kg
+    observacoes TEXT,
+    numeroCCPassageiro TEXT NOT NULL,
+    FOREIGN KEY (numeroCCPassageiro) REFERENCES Passageiro(numeroCC)
+        ON DELETE RESTRICT
+        ON UPDATE CASCADE
 );
 
--- CartaoEmbarque
+-- =============================================================================
+-- TABELA: CartaoEmbarque
+-- Cartões de embarque emitidos após check-in
+-- =============================================================================
 CREATE TABLE CartaoEmbarque (
-  idCartaoEmbarque INTEGER PRIMARY KEY,
-  idCartao INTEGER,
-  portaEmbarque TEXT,
-  horaEmbarque TIME,
-  FOREIGN KEY (idCartao) REFERENCES CheckIn(idCheckIn)
+    idCartao INTEGER PRIMARY KEY AUTOINCREMENT,
+    portaEmbarque TEXT NOT NULL,
+    horaEmbarque TIME NOT NULL,
+    idCheckIn INTEGER UNIQUE NOT NULL, -- cada check-in gera um cartão
+    idVoo INTEGER NOT NULL,
+    FOREIGN KEY (idCheckIn) REFERENCES CheckIn(idCheckIn)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE,
+    FOREIGN KEY (idVoo) REFERENCES Voo(idVoo)
+        ON DELETE RESTRICT
+        ON UPDATE CASCADE
 );
 
--- Bagagem
+-- =============================================================================
+-- TABELA: Bagagem
+-- Bagagens despachadas pelos passageiros
+-- =============================================================================
 CREATE TABLE Bagagem (
-  idBagagem INTEGER PRIMARY KEY,
-  peso REAL,
-  estadoValidacao TEXT,
-  destino TEXT
+    idBagagem INTEGER PRIMARY KEY AUTOINCREMENT,
+    peso REAL NOT NULL CHECK (peso > 0), -- em kg
+    status TEXT NOT NULL, -- ex: 'despachada', 'em trânsito', 'entregue', 'extraviada'
+    destinoFinal TEXT NOT NULL,
+    idCheckIn INTEGER NOT NULL,
+    FOREIGN KEY (idCheckIn) REFERENCES CheckIn(idCheckIn)
+        ON DELETE RESTRICT
+        ON UPDATE CASCADE
 );
 
--- Equipamento
-CREATE TABLE Equipamento (
-  idEquipamento INTEGER PRIMARY KEY,
-  tipo TEXT,
-  estado TEXT,
-  emUso BOOLEAN
-);
-
--- Manutencao
-CREATE TABLE Manutencao (
-  idManutencao INTEGER PRIMARY KEY,
-  data DATE,
-  tipo TEXT,
-  custo REAL
-);
+-- =============================================================================
+-- FIM DO SCHEMA
+-- =============================================================================
